@@ -5,10 +5,11 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+const router = express.Router();
 dotenv.config({ path: "./.env" });
 
 const app = express();
-
+const controller = {};
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -16,7 +17,7 @@ const db = mysql.createConnection({
     database: process.env.DATABASE
 });
 
-exports.login = async(req,res) => {
+controller.login = async(req,res) => {
     try {
         const {email,password} = req.body;
         if(!email || !password){
@@ -47,7 +48,7 @@ exports.login = async(req,res) => {
                 }
 
                 res.cookie('jwt' , token , cookieOptions);
-                res.status(200).redirect("/");
+                res.json({auth:true , token: token}).status(200).redirect("/");
             }
         })
     } catch (error) {
@@ -55,7 +56,21 @@ exports.login = async(req,res) => {
     }
 }
 
-exports.register = (req,res) => {
+controller.verify = async (req,res,next)=>{
+    const token = req.headers['authorization'];
+    console.log(token);
+    if(!token)
+    {
+        return res.status(401).render('login' , {
+            message: 'Debes de iniciar sesion para poder navegar'
+        });
+    }
+
+    const decoded =  jwt.verify(token , process.env.JWT_SECRET);
+}
+
+
+controller.register = (req,res) => {
     console.log(req.body);
 
     // const name  = req.body.name;
@@ -94,3 +109,5 @@ exports.register = (req,res) => {
         });
     });
 };
+
+module.exports = controller;
