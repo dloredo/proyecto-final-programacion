@@ -48,7 +48,7 @@ controller.login = async(req,res) => {
                 }
 
                 res.cookie('jwt' , token , cookieOptions);
-                res.json({auth:true , token: token}).status(200).redirect("/");
+                res.status(200).redirect("/");
             }
         })
     } catch (error) {
